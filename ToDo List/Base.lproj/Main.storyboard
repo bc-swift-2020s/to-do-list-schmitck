@@ -43,6 +43,11 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <navigationItem key="navigationItem" id="GIS-TT-AEN">
+                        <barButtonItem key="leftBarButtonItem" title="Edit" id="ett-w9-wOM">
+                            <connections>
+                                <action selector="editButtonPressed:" destination="BYZ-38-t0r" id="m6K-MF-IxC"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="z8z-nA-vlq">
                             <connections>
                                 <segue destination="u8q-Ox-Oze" kind="presentation" identifier="AddDetail" id="DhH-n7-T8t"/>
@@ -50,6 +55,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="addBarButton" destination="z8z-nA-vlq" id="oaG-6o-DMh"/>
+                        <outlet property="editBarButton" destination="z8z-nA-vlq" id="nRO-hy-AK1"/>
                         <outlet property="tableView" destination="Sbp-9D-BQS" id="xTB-iJ-yiC"/>
                     </connections>
                 </viewController>
@@ -76,7 +83,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="xdS-x3-oXO">
-                                                    <rect key="frame" x="15" y="5" width="288" height="34"/>
+                                                    <rect key="frame" x="14" y="5" width="288" height="34"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits"/>
