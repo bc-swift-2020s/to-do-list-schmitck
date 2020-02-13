@@ -20,8 +20,48 @@ class toDoListViewController: UIViewController {
         // Do any additional setup after loading the view.
         tableView.delegate = self
         tableView.dataSource = self
+        
+        loadData()
     }
-
+    
+    func loadData() {
+        let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+              //to use again, the only thing you need to do is change "todos"
+              let documentURL = directoryURL.appendingPathComponent("todos").appendingPathExtension("json")
+        
+        guard let data = try? Data(contentsOf: documentURL) else {
+            return
+        }
+        let jsonDecoder = JSONDecoder()
+        do {
+            toDoItems = try jsonDecoder.decode(Array<ToDoItem>.self, from: data)
+            tableView.reloadData()
+        } catch {
+            print("ERROR: Could not load data 😡 \(error.localizedDescription)")
+        }
+    }
+    
+    func saveData() {
+        //going through the apps FileManager and using a URL
+        //gives access to all the stuff on the file system
+        //.userDomainMask is where the personal data is saved
+        //by saying .first! you are getting the first element of the urls array
+        let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        //to use again, the only thing you need to do is change "todos"
+        let documentURL = directoryURL.appendingPathComponent("todos").appendingPathExtension("json")
+        let jsonEncoder = JSONEncoder()
+        //try? throws, meaning that if the method has an error, it will return nil
+        let data = try? jsonEncoder.encode(toDoItems)
+        do {
+            //.noFileProtection allows file to overwrite any existing file
+            try data?.write(to: documentURL, options: .noFileProtection)
+        } catch {
+            print("ERROR: Could not save data 😡 \(error.localizedDescription)")
+        }
+        //put this wherever data is changed
+    }
+    
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowDetail" {
             //this is where our segue is headed
@@ -46,6 +86,7 @@ class toDoListViewController: UIViewController {
             tableView.insertRows(at: [newIndexPath], with: .bottom)
             tableView.scrollToRow(at: newIndexPath, at: .bottom, animated: true)
             }
+            saveData()
         }
     
     @IBAction func editButtonPressed(_ sender: UIBarButtonItem) {
@@ -82,6 +123,7 @@ extension toDoListViewController: UITableViewDelegate, UITableViewDataSource{
         if editingStyle == .delete {
             toDoItems.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            saveData()
         }
     }
     
@@ -89,5 +131,6 @@ extension toDoListViewController: UITableViewDelegate, UITableViewDataSource{
          let itemToMove = toDoItems[sourceIndexPath.row]
         toDoItems.remove(at: sourceIndexPath.row)
         toDoItems.insert(itemToMove, at: destinationIndexPath.row)
+        saveData()
     }
 }
