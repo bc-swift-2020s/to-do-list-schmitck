@@ -5,8 +5,9 @@
 //  Created by Cooper Schmitz on 2/8/20.
 //  Copyright © 2020 Cooper Schmitz. All rights reserved.
 //
-
+//MARK:- import UserNotifications
 import UIKit
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,7 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+     //This gives the notification center on the device the right to send messages that are sent and received by the app and respond to them
+        UNUserNotificationCenter.current().delegate = self
         return true
     }
 
@@ -35,3 +37,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+//MARK:- Notification Extension Required
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+      
+        //this code is not necessary, but it gives you a heads up of when a notification is displayed and is going to be displayed soon
+        let id = notification.request.identifier
+        print("Received in=app notification with ID = \(id)")
+            //removed delivered notifications because you do not want them lingering around in the notification queue
+        //MARK:- LEGO PIECE
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        completionHandler([.alert,.sound])
+    }
+}

@@ -7,6 +7,7 @@
 //THIS IS THE SOURCE OF THE DATA
 
 import UIKit
+import UserNotifications
 
 class toDoListViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
@@ -20,8 +21,72 @@ class toDoListViewController: UIViewController {
         // Do any additional setup after loading the view.
         tableView.delegate = self
         tableView.dataSource = self
-        
         loadData()
+        authorizeLocalNotifications()
+    }
+    
+    //function to request authorization so we can send notifications
+    func authorizeLocalNotifications() {
+        // UNUserNotificationCenter.current() ALWAYS GO TOGETHER
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]) { (granted, error) in
+            //im gonna guard and make sure that the only thing is if error is nil and then im going to perform code in the else brackets
+            guard error == nil else {
+                print("😡 ERROR: \(error!.localizedDescription)")
+                return
+            }
+            if granted {
+                print("✅ Notifications have been granted!")
+            } else {
+                print("🚫 Notifications denied!")
+                //TODO: Put an alert in here telling the user what to do
+                // putting todo in all caps puts a reminder in the jump bar
+            }
+        }
+    }
+    
+    func setNotifications() {
+        guard toDoItems.count > 0 else {
+            return
+        }
+        //remove all notifications
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        
+        //and let's create them with updated data that we JUST saved
+        for index in 0..<toDoItems.count {
+            if toDoItems[index].reminderSet {
+                let toDoItem = toDoItems[index]
+                toDoItems[index].notificationID = setCalendarNotification(title: toDoItem.name, subtitle: "", body: toDoItem.notes, badgeNumber: nil, sound: .default, date: toDoItem.date)
+            }
+        }
+    }
+    
+    func setCalendarNotification(title: String, subtitle: String, body: String, badgeNumber: NSNumber?, sound: UNNotificationSound?, date: Date) -> String {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.subtitle = subtitle
+        content.body = body
+        content.sound = sound
+        content.badge = badgeNumber
+        
+        //create trigger
+        
+        var dateCompenents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+        dateCompenents.second = 00
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateCompenents, repeats: false )
+        //creating a request
+        let notificationID = UUID().uuidString
+        let request = UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
+        
+        //regiester request with notification center
+        
+        UNUserNotificationCenter.current().add(request) { (error) in
+            if let error = error {
+                print("😡ERROR: \(error.localizedDescription)")
+            } else {
+                print("Notification scheduled \(notificationID), title: \(content.title)")
+            }
+        }
+        return notificationID
     }
     
     func loadData() {
@@ -59,6 +124,9 @@ class toDoListViewController: UIViewController {
             print("ERROR: Could not save data 😡 \(error.localizedDescription)")
         }
         //put this wherever data is changed
+       setNotifications()
+        
+        
     }
     
     
