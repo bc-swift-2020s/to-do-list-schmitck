@@ -37,12 +37,26 @@ class ToDoDetailTableTableViewController: UITableViewController {
         super.viewDidLoad()
         if toDoItem == nil {
             toDoItem =  ToDoItem(name: "", date: Date().addingTimeInterval(24*60*60), notes: "", reminderSet: false,  completed: false)
+            nameField.becomeFirstResponder()
         }
+        //hide keyboard whenever tapped outside
+        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
+        tap.cancelsTouchesInView = false
+        self.view.addGestureRecognizer(tap)
+        nameField.delegate = self
         updateUserInterface()
 
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         toDoItem = ToDoItem(name: nameField.text!, date: datePicker.date, notes: noteView.text, reminderSet: reminderSwitch.isOn, completed: toDoItem.completed )
+    }
+    
+    func enableDisableSaveButton(text: String) {
+        if text.count > 0 {
+                  saveBarButton.isEnabled = true
+              } else {
+                  saveBarButton.isEnabled = false
+              }
     }
     
     func updateUserInterface() {
@@ -53,6 +67,7 @@ class ToDoDetailTableTableViewController: UITableViewController {
         //TERNARY OPERATOR instead
         dateLabel.textColor = (reminderSwitch.isOn ? .black : .gray)
         dateLabel.text = dateFormatter.string(from: toDoItem.date)
+        enableDisableSaveButton(text: nameField.text!)
     }
     
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
@@ -67,6 +82,7 @@ class ToDoDetailTableTableViewController: UITableViewController {
         }
     }
     @IBAction func reminderSwitchChanged(_ sender: UISwitch) {
+        self.view.endEditing(true)
         //TERNARY OPERATOR
     dateLabel.textColor = (reminderSwitch.isOn ? .black : .gray)
         tableView.beginUpdates()
@@ -74,8 +90,15 @@ class ToDoDetailTableTableViewController: UITableViewController {
     }
     
     @IBAction func datePickerChanged(_ sender: UIDatePicker) {
+       self.view.endEditing(true)
         dateLabel.text = dateFormatter.string(from: sender.date)
     }
+    
+    
+    @IBAction func textFieldEditingChanged(_ sender: UITextField) {
+        enableDisableSaveButton(text: sender.text!)
+    }
+    
     
 }
 extension ToDoDetailTableTableViewController {
@@ -88,5 +111,12 @@ extension ToDoDetailTableTableViewController {
         default:
             return defaultRowHeight
         }
+    }
+}
+
+extension ToDoDetailTableTableViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        noteView.becomeFirstResponder()
+        return true
     }
 }
