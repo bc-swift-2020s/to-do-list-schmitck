@@ -6,11 +6,11 @@
 //  Copyright © 2020 Cooper Schmitz. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import UserNotifications
 
 struct LocalNotificationManager {
-  static func authorizeLocalNotifications() {
+    static func authorizeLocalNotifications(viewController: UIViewController) {
            // UNUserNotificationCenter.current() ALWAYS GO TOGETHER
            UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]) { (granted, error) in
                //im gonna guard and make sure that the only thing is if error is nil and then im going to perform code in the else brackets
@@ -22,11 +22,32 @@ struct LocalNotificationManager {
                    print("✅ Notifications have been granted!")
                } else {
                    print("🚫 Notifications denied!")
-                   //TODO: Put an alert in here telling the user what to do
-                   // putting todo in all caps puts a reminder in the jump bar
+                //STUFF IN DIPATCH RUNS ON THE MAIN THREAD, NOT THE BACKGROUND THREAD
+                DispatchQueue.main.async {
+                    viewController.oneButtonAlert(title: "User Has Not Allowed Notications", message: "To receive alerts from reminders, open Settings App, select To Do List > Notifications > Allow Notifications.")
+                }
                }
            }
        }
+    
+    static func isAuthorized(completed: @escaping (Bool)->() ) {
+        // UNUserNotificationCenter.current() ALWAYS GO TOGETHER
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]) { (granted, error) in
+            //im gonna guard and make sure that the only thing is if error is nil and then im going to perform code in the else brackets
+            guard error == nil else {
+                print("😡 ERROR: \(error!.localizedDescription)")
+                completed(false)
+                return
+            }
+            if granted {
+                print("✅ Notifications have been granted!")
+                 completed(true)
+            } else {
+                print("🚫 Notifications denied!")
+                 completed(false)
+            }
+        }
+    }
     
     
    static func setCalendarNotification(title: String, subtitle: String, body: String, badgeNumber: NSNumber?, sound: UNNotificationSound?, date: Date) -> String {
@@ -55,6 +76,7 @@ struct LocalNotificationManager {
                    print("Notification scheduled \(notificationID), title: \(content.title)")
                }
            }
+    
            return notificationID
        }
 }

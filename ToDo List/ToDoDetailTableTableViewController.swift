@@ -70,6 +70,22 @@ class ToDoDetailTableTableViewController: UITableViewController {
         enableDisableSaveButton(text: nameField.text!)
     }
     
+    func updateReminderSwitch() {
+        LocalNotificationManager.isAuthorized { (authorized) in
+            DispatchQueue.main.async {
+                if !authorized && self.reminderSwitch.isOn {
+                    self.oneButtonAlert(title: "User Has Not Allowed Notications", message: "To receive alerts from reminders, open Settings App, select To Do List > Notifications > Allow Notifications.")
+                    self.reminderSwitch.isOn = false
+                }
+                self.view.endEditing(true)
+                //TERNARY OPERATOR
+                self.dateLabel.textColor = (self.reminderSwitch.isOn ? .black : .gray)
+                self.tableView.beginUpdates()
+                self.tableView.endUpdates()
+            }
+        }
+    }
+    
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
         //MARK:- SOFTWARE LEGO - POP AND DISMISS 
         //the presenting view controller is the new navigation controller, this will give a Boolean
@@ -82,11 +98,7 @@ class ToDoDetailTableTableViewController: UITableViewController {
         }
     }
     @IBAction func reminderSwitchChanged(_ sender: UISwitch) {
-        self.view.endEditing(true)
-        //TERNARY OPERATOR
-    dateLabel.textColor = (reminderSwitch.isOn ? .black : .gray)
-        tableView.beginUpdates()
-        tableView.endUpdates()
+        updateReminderSwitch()
     }
     
     @IBAction func datePickerChanged(_ sender: UIDatePicker) {

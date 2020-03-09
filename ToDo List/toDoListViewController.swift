@@ -25,7 +25,8 @@ class toDoListViewController: UIViewController {
         toDoItems.loadData {
             self.tableView.reloadData()
         }
-        LocalNotificationManager.authorizeLocalNotifications()
+        //self refers to THIS CURRENT CLASS, which is a subclass of UIViewController
+        LocalNotificationManager.authorizeLocalNotifications(viewController: self)
     }
     
     //function to request authorization so we can send notifications
