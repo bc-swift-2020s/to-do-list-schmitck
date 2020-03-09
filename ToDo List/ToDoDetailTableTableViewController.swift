@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import UserNotifications
 //CACHABLE DATEFORMATTER
 
 private let dateFormatter: DateFormatter = {
@@ -35,6 +36,9 @@ class ToDoDetailTableTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //setup foreground notification
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(appActiveNotification), name: UIApplication.didBecomeActiveNotification, object: nil)
         if toDoItem == nil {
             toDoItem =  ToDoItem(name: "", date: Date().addingTimeInterval(24*60*60), notes: "", reminderSet: false,  completed: false)
             nameField.becomeFirstResponder()
@@ -46,6 +50,11 @@ class ToDoDetailTableTableViewController: UITableViewController {
         nameField.delegate = self
         updateUserInterface()
 
+    }
+    
+    @objc func appActiveNotification(){
+        print("The app just came to foreground 😁")
+        updateReminderSwitch()
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         toDoItem = ToDoItem(name: nameField.text!, date: datePicker.date, notes: noteView.text, reminderSet: reminderSwitch.isOn, completed: toDoItem.completed )
