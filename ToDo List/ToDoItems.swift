@@ -7,9 +7,10 @@
 //
 
 import Foundation
-
+import UserNotifications
 class ToDoItems {
     var itemsArray: [ToDoItem] = []
+  
     func saveData() {
         //going through the apps FileManager and using a URL
         //gives access to all the stuff on the file system
@@ -27,6 +28,7 @@ class ToDoItems {
         } catch {
             print("ERROR: Could not save data 😡 \(error.localizedDescription)")
         }
+        setNotifications()
         //put this wherever data is changed
     }
     
@@ -47,4 +49,20 @@ class ToDoItems {
                }
         completed()
     }
+    
+    func setNotifications() {
+           guard itemsArray.count > 0 else {
+               return
+           }
+           //remove all notifications
+           UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+           
+           //and let's create them with updated data that we JUST saved
+           for index in 0..<itemsArray.count {
+               if itemsArray[index].reminderSet {
+                   let toDoItem = itemsArray[index]
+                itemsArray[index].notificationID = LocalNotificationManager.setCalendarNotification(title: toDoItem.name, subtitle: "", body: toDoItem.notes, badgeNumber: nil, sound: .default, date: toDoItem.date)
+               }
+           }
+       }
 }
